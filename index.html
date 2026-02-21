@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 马年烟花模拟器</title>
+    <meta name="description" content="基于手势控制的沉浸式2026马年新春烟花体验">
+    <link rel="stylesheet" href="style.css">
+    <!-- LXGW WenKai Chinese Calligraphy Font -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css">
+    <!-- MediaPipe Hands & Camera Utils -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <!-- Opening Overlay -->
+    <div id="landing-overlay">
+        <!-- Floating sparkles -->
+        <span class="sparkle s1">✦</span>
+        <span class="sparkle s2">✧</span>
+        <span class="sparkle s3">✦</span>
+        <span class="sparkle s4">✧</span>
+        <span class="sparkle s5">✦</span>
+        <span class="sparkle s6">✧</span>
+
+        <div class="landing-content">
+            <p class="landing-subtitle">新 春 快 乐 · HAPPY NEW YEAR</p>
+            <div class="landing-year-badge">丙午年</div>
+            <h1 class="glow-text">2026，金马逢春</h1>
+            <p class="landing-horse">🐴</p>
+            <p class="landing-desc">捏合手指 · 绽放绚烂烟花</p>
+            <button id="start-btn">✨ 开启体验</button>
+            <p class="landing-version">Made with ❤️ by 橙C美事</p>
+        </div>
+    </div>
+
+    <!-- Main Canvas -->
+    <div id="canvas-container">
+        <canvas id="fireworks-canvas"></canvas>
+    </div>
+
+    <!-- Author Watermark -->
+    <div class="author-watermark">🎆 橙C美事</div>
+
+    <!-- Gesture Cursor -->
+    <div id="gesture-cursor" class="hidden"></div>
+
+    <!-- Video Feed (Hidden) -->
+    <video id="webcam-feed" class="hidden" autoplay playsinline></video>
+
+    <!-- Reopen Panel Button (shown when panel is hidden) -->
+    <div id="panel-reopen-btn" class="panel-reopen-btn hidden" title="打开控制台">⚙️</div>
+
+    <!-- Control Panel -->
+    <aside id="control-panel">
+        <div class="panel-header">
+            <span class="icon">🎆</span>
+            <h2>控制台</h2>
+            <button id="panel-close-btn" class="panel-close-btn" title="收起">‹</button>
+        </div>
+
+        <div class="status-indicator">
+            <span id="gesture-status">等待摄像头...</span>
+        </div>
+
+        <div class="control-group">
+            <label>烟花绽放基础形状</label>
+            <div class="shape-selector">
+                <button class="shape-btn active" data-shape="sphere" title="经典球形">💫</button>
+                <button class="shape-btn" data-shape="heart" title="爱心">❤️</button>
+                <button class="shape-btn" data-shape="star" title="五角星">⭐</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>马年限定——文字样烟花祝福</label>
+            <div class="blessing-selector">
+                <button class="blessing-btn" data-text="马到成功">马到成功</button>
+                <button class="blessing-btn" data-text="龙马精神">龙马精神</button>
+                <button class="blessing-btn" data-text="万马奔腾">万马奔腾</button>
+                <button class="blessing-btn" data-text="一马当先">一马当先</button>
+                <button class="blessing-btn" data-text="福">福</button>
+                <button class="blessing-btn" data-text="2026">2026</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>自定义绽放文字</label>
+            <input type="text" id="text-input" placeholder="输入文字（如：恭喜发财）" class="glass-input" maxlength="8">
+        </div>
+
+        <div class="control-group">
+            <label>烟花色彩定制</label>
+            <div class="color-selector">
+                <button class="color-btn active" data-color="#ffe8c0" style="background-color: #ffe8c0;"
+                    title="白金"></button>
+                <button class="color-btn" data-color="#ff3b5c" style="background-color: #ff3b5c;" title="红"></button>
+                <button class="color-btn" data-color="#ffd700" style="background-color: #ffd700;" title="金"></button>
+                <button class="color-btn" data-color="#00e5ff" style="background-color: #0084ff;" title="青"></button>
+                <button class="color-btn" data-color="#e040fb" style="background-color: #e040fb;" title="紫"></button>
+                <button class="color-btn rainbow-btn" data-color="rainbow" title="幻彩"></button>
+            </div>
+            <div class="custom-color-row">
+                <input type="range" id="hue-slider" class="hue-slider" min="0" max="360" value="30">
+                <div id="hue-preview" class="hue-preview" style="background-color: hsl(30, 100%, 65%);"></div>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>爆炸规模 <span id="size-value">1.0x</span></label>
+            <input type="range" id="size-slider" min="0.5" max="2.0" step="0.1" value="1.0">
+        </div>
+
+
+        <div class="control-group">
+            <button id="clear-btn" class="clear-btn">🧹 清屏</button>
+        </div>
+
+        <div class="gesture-guide">
+            <label>📖 操作指南</label>
+            <div class="guide-items">
+                <div class="guide-item">
+                    <span class="guide-icon">🤏</span>
+                    <span class="guide-text">捏合手指 — 发射烟花</span>
+                </div>
+                <div class="guide-item">
+                    <span class="guide-icon">✊</span>
+                    <span class="guide-text">握拳 — 连续绽放</span>
+                </div>
+                <div class="guide-item">
+                    <span class="guide-icon">🖱️</span>
+                    <span class="guide-text">点击屏幕 — 快速发射</span>
+                </div>
+            </div>
+        </div>
+
+
+    </aside>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

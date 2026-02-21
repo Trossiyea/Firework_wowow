@@ -1,0 +1,15 @@
+# Deployment files
+Dockerfile
+Dockerfile.https
+.codebuddy/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
