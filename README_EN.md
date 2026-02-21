@@ -4,6 +4,8 @@ English | **[中文](README.md)**
 
 A gesture-controlled web fireworks simulator built for the 2026 Chinese New Year (Year of the Horse). Pinch your fingers in front of the camera to launch fireworks, or just click anywhere on the screen.
 
+![Preview](assets/demo.png)
+
 ## Live Demo
 
 | Method | URL |
